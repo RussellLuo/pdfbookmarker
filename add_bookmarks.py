@@ -20,7 +20,7 @@ __all__ = [
 ]
 
 __author__ = 'RussellLuo'
-__version__ = '0.01'
+__version__ = '0.02'
 
 def add_bookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename=None):
     """Add bookmarks into PDF
@@ -53,7 +53,7 @@ def add_bookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename=None):
         pdf_out_filename = name_parts[0] + '(new)' + name_parts[1]
 
     # save `pdf_out`
-    outputStream = file(pdf_out_filename, 'wb')
+    outputStream = open(pdf_out_filename, 'wb')
     pdf_out.write(outputStream)
     outputStream.close()
 
@@ -127,7 +127,7 @@ def run_script(pdf_in_filename, bookmarks_filename, pdf_out_filename=None):
     try:
         bookmarks_tree = get_bookmarks_tree(bookmarks_filename)
         add_bookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename)
-    except Exception, e:
+    except Exception as e:
         print('failed:\n    %s' % str(e))
     else:
         print('succeeded')
