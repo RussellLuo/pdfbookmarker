@@ -53,9 +53,8 @@ def add_bookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename=None):
         pdf_out_filename = name_parts[0] + '(new)' + name_parts[1]
 
     # save `pdf_out`
-    outputStream = open(pdf_out_filename, 'wb')
-    pdf_out.write(outputStream)
-    outputStream.close()
+    with open(pdf_out_filename, 'wb') as outputStream:
+        pdf_out.write(outputStream)
 
 def get_bookmarks_tree(bookmarks_filename):
     """Get bookmarks tree from TEXT-format file
