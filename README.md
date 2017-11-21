@@ -26,7 +26,7 @@ For samples, see `sample_bookmarks.txt`.
 3)  Generate a copy of `MyBook.pdf` with additional bookmarks file specified by
     `my_bookmarks.txt`:
 
-    ./add_bookmarks.py MyBook.pdf my_bookmarks.txt
+    ```./add_bookmarks.py MyBook.pdf my_bookmarks.txt```
 
 An auto-detected, expected or suggested filename for bookmarks is `MyBook.txt`,
 when the input filenamne e.g. is `MyBook.pdf`.
