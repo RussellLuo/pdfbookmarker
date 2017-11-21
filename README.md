@@ -13,13 +13,13 @@ To use the scripts here, you must install or download [PyPDF2][] first.
 
 1)  Make `add_bookmarks.py` executable:
 
-    $ chmod +x add_bookmarks.py
+    ```$ chmod +x add_bookmarks.py```
 
 2)  Turn to your target PDF (e.g. `MyBook.pdf`), record bookmark titles and page
     numbers of the PDF into a TEXT file (e.g. `my_bookmarks.txt`) **by hand** 
     with the following format:
 
-    <nested level>"<bookmark title>"|<page number>
+    ```<nested level>"<bookmark title>"|<page number>```
 
 For samples, see `sample_bookmarks.txt`.
 
