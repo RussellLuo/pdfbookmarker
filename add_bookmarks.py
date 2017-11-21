@@ -1,42 +1,59 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""Add bookmarks to existing PDF files
 
-"""Add bookmarks into PDF
+Usage:
+  ./add_bookmarks.py [options] <FILE.pdf> [FILE.txt] [FILE-new.pdf]
 
-usage:
-    ./add_bookmarks.py <pdf_in_filename> <bookmarks_filename> [pdf_out_filename]
-    or
-    ./add_bookmarks.py --test
+Options:
+  -h, --help    show this help
+
+Examples:
+  ./add_bookmarks.py FILE.pdf # will read FILE.pdf as PDF, FILE.txt as a
+  bookmarks file and shall give the FILE-new.pdf as output.
+
+Hence, parameters FILE.txt and FILE-new.pdf are optional, hah.
+
+License GPLv3+: GNU/GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+This is free software, you are free to change and redistribute it.  There is
+NO WARRANTY, to the extent permitted by law. Use it at your own risk!
 """
 
 import os
 import re
 import codecs
 
-from PyPDF2 import PdfFileWriter, PdfFileReader
+from PyPDF2 import PdfFileMerger, PdfFileReader
 
 __all__ = [
     'add_bookmarks'
 ]
 
 __author__ = 'RussellLuo'
-__version__ = '0.02'
+__version__ = '0.03'
 
 def add_bookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename=None):
-    """Add bookmarks into PDF
+    """Add bookmarks to existing PDF files
+
+    Home:
+        https://github.com/RussellLuo/pdfbookmarker
 
     Some useful references:
         [1] http://pybrary.net/pyPdf/
         [2] http://stackoverflow.com/questions/18855907/adding-bookmarks-using-pypdf2
         [3] http://stackoverflow.com/questions/3009935/looking-for-a-good-python-tree-data-structure
     """
-    pdf_out = PdfFileWriter()
+    pdf_out = PdfFileMerger()
 
-    # copy `pdf_in` into `pdf_out`
-    pdf_in = PdfFileReader(open(pdf_in_filename, 'rb'))
-    numpages = pdf_in.getNumPages()
-    for i in range(numpages):
-        pdf_out.addPage(pdf_in.getPage(i))
+    # read `pdf_in` into `pdf_out`, using PyPDF2.PdfFileMerger()
+    with open(pdf_in_filename, 'rb') as inputStream:
+        pdf_out.append(inputStream, import_bookmarks=False)
+
+    # copy/preserve existing metainfo
+    pdf_in = PdfFileReader(pdf_in_filename)
+    metaInfo = pdf_in.getDocumentInfo()
+    if metaInfo:
+        pdf_out.addMetadata(metaInfo)
 
     def crawl_tree(tree, parent):
         for title, pagenum, subtree in tree:
@@ -50,9 +67,9 @@ def add_bookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename=None):
     # get `pdf_out_filename` if it's not specified
     if not pdf_out_filename:
         name_parts = os.path.splitext(pdf_in_filename)
-        pdf_out_filename = name_parts[0] + '(new)' + name_parts[1]
+        pdf_out_filename = name_parts[0] + '-new' + name_parts[1]
 
-    # save `pdf_out`
+    # wrie `pdf_out`
     with open(pdf_out_filename, 'wb') as outputStream:
         pdf_out.write(outputStream)
 
@@ -122,29 +139,32 @@ def get_bookmarks_tree(bookmarks_filename):
 
 # run as a script
 def run_script(pdf_in_filename, bookmarks_filename, pdf_out_filename=None):
-    print('in processing, please wait a moment...')
+    sys.stderr.write('processing, please wait ...')
     try:
         bookmarks_tree = get_bookmarks_tree(bookmarks_filename)
-        add_bookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename)
+        addBookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename)
     except Exception as e:
-        print('failed:\n    %s' % str(e))
+        sys.stderr.write("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bfailed:         \n  %s\n" % str(e))
     else:
-        print('succeeded')
+        sys.stderr.write("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bdone!           \n")
 
 # documentation test
 def doc_test():
     import doctest
     doctest.testmod()
 
-# test
+# test and, or execute
 if __name__ == '__main__':
     import sys
 
-    if len(sys.argv) not in (2, 3, 4):
+    if len(sys.argv) not in (2, 3, 4) or sys.argv[1] in ('-h', '--help'):
         sys.stderr.write(__doc__)
         sys.exit(1)
 
-    if sys.argv[1] == '--test':
+    if sys.argv[1] in ('-t', '--test'):
         doc_test()
+    elif len(sys.argv) == 2:
+        name_parts = os.path.splitext(sys.argv[1])
+        run_script(sys.argv[1], name_parts[0] + '.txt', pdf_out_filename=None)
     else:
         run_script(*sys.argv[1:])
