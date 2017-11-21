@@ -26,13 +26,13 @@ import codecs
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
 __all__ = [
-    'add_bookmarks'
+    'addBookmarks'
 ]
 
 __author__ = 'RussellLuo'
 __version__ = '0.03'
 
-def add_bookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename=None):
+def addBookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename=None):
     """Add bookmarks to existing PDF files
 
     Home:
