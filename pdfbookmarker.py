@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 """Add bookmarks to existing PDF files
 
 Usage:
@@ -13,26 +14,22 @@ Examples:
   bookmarks file and shall give the FILE-new.pdf as output.
 
 Hence, parameters FILE.txt and FILE-new.pdf are optional, hah.
-
-License GPLv3+: GNU/GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
-This is free software, you are free to change and redistribute it.  There is
-NO WARRANTY, to the extent permitted by law. Use it at your own risk!
 """
 
+import codecs
 import os
 import re
-import codecs
+import sys
 
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
-__all__ = [
-    'addBookmarks'
-]
-
-__author__ = 'RussellLuo'
 __version__ = '0.03'
+__author__ = 'RussellLuo'
+__email__ = 'luopeng.he@gmail.com'
+__license__ = 'MIT'
 
-def addBookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename=None):
+
+def add_bookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename=None):
     """Add bookmarks to existing PDF files
 
     Home:
@@ -46,18 +43,18 @@ def addBookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename=None):
     pdf_out = PdfFileMerger()
 
     # read `pdf_in` into `pdf_out`, using PyPDF2.PdfFileMerger()
-    with open(pdf_in_filename, 'rb') as inputStream:
-        pdf_out.append(inputStream, import_bookmarks=False)
+    with open(pdf_in_filename, 'rb') as f:
+        pdf_out.append(f, import_bookmarks=False)
 
-    # copy/preserve existing metainfo
+    # copy/preserve existing document info
     pdf_in = PdfFileReader(pdf_in_filename)
-    metaInfo = pdf_in.getDocumentInfo()
-    if metaInfo:
-        pdf_out.addMetadata(metaInfo)
+    doc_info = pdf_in.getDocumentInfo()
+    if doc_info:
+        pdf_out.addMetadata(doc_info)
 
     def crawl_tree(tree, parent):
-        for title, pagenum, subtree in tree:
-            current = pdf_out.addBookmark(title, pagenum, parent) # add parent bookmark
+        for title, page_num, subtree in tree:
+            current = pdf_out.addBookmark(title, page_num, parent) # add parent bookmark
             if subtree:
                 crawl_tree(subtree, current)
 
@@ -72,6 +69,9 @@ def addBookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename=None):
     # wrie `pdf_out`
     with open(pdf_out_filename, 'wb') as outputStream:
         pdf_out.write(outputStream)
+
+    return pdf_out_filename
+
 
 def get_bookmarks_tree(bookmarks_filename):
     """Get bookmarks tree from TEXT-format file
@@ -122,11 +122,11 @@ def get_bookmarks_tree(bookmarks_filename):
     for line in codecs.open(bookmarks_filename, 'r', encoding='utf-8'):
         res = re.match(r'(\+*)\s*?"([^"]+)"\s*\|\s*(\d+)', line.strip())
         if res:
-            pluses, title, pagenum = res.groups()
-            cur_level = len(pluses) # plus count stands for level
-            cur_node = (title, int(pagenum) - 1, [])
+            pluses, title, page_num = res.groups()
+            cur_level = len(pluses)  # plus count stands for level
+            cur_node = (title, int(page_num) - 1, [])
 
-            if not (cur_level > 0 and cur_level <= prev_level + 1):
+            if not (0 < cur_level <= prev_level + 1):
                 raise Exception('plus (+) count is invalid here: %s' % line.strip())
             else:
                 # append the current node into its parent node (with the level `cur_level` - 1)
@@ -137,26 +137,27 @@ def get_bookmarks_tree(bookmarks_filename):
 
     return tree
 
+
 # run as a script
 def run_script(pdf_in_filename, bookmarks_filename, pdf_out_filename=None):
-    sys.stderr.write('processing, please wait ...')
+    sys.stderr.write('In processing, please wait...\n')
     try:
         bookmarks_tree = get_bookmarks_tree(bookmarks_filename)
-        addBookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename)
-    except Exception as e:
-        sys.stderr.write("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bfailed:         \n  %s\n" % str(e))
+        pdf_out_filename = add_bookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename)
+    except Exception as exc:
+        sys.stderr.write("error:\n%s\n" % str(exc))
     else:
-        sys.stderr.write("\b\b\b\b\b\b\b\b\b\b\b\b\b\b\bdone!           \n")
+        sys.stderr.write("New PDF generated: %s\n" % pdf_out_filename)
+
 
 # documentation test
 def doc_test():
     import doctest
     doctest.testmod()
 
-# test and, or execute
-if __name__ == '__main__':
-    import sys
 
+# test and, or execute
+def main():
     if len(sys.argv) not in (2, 3, 4) or sys.argv[1] in ('-h', '--help'):
         sys.stderr.write(__doc__)
         sys.exit(1)
@@ -168,3 +169,7 @@ if __name__ == '__main__':
         run_script(sys.argv[1], name_parts[0] + '.txt', pdf_out_filename=None)
     else:
         run_script(*sys.argv[1:])
+
+
+if __name__ == '__main__':
+    main()
