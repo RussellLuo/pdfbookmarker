@@ -23,7 +23,7 @@ import sys
 
 from PyPDF2 import PdfFileMerger, PdfFileReader
 
-__version__ = '0.03'
+__version__ = '0.5.0'
 __author__ = 'RussellLuo'
 __email__ = 'luopeng.he@gmail.com'
 __license__ = 'MIT'
