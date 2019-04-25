@@ -117,13 +117,20 @@ def get_bookmarks_tree(bookmarks_filename):
     # `value`: the children list of the node
     latest_nodes = {0: tree}
 
+    offset = 0
     prev_level = 0
     for line in codecs.open(bookmarks_filename, 'r', encoding='utf-8'):
+        if line[0:2] == '//':
+            try:
+                offset = int(line[2:])
+            except ValueError:
+                pass
+            continue
         res = re.match(r'(\+*)\s*?"([^"]+)"\s*\|\s*(\d+)', line.strip())
         if res:
             pluses, title, page_num = res.groups()
             cur_level = len(pluses)  # plus count stands for level
-            cur_node = (title, int(page_num) - 1, [])
+            cur_node = (title, int(page_num) - 1 + offset, [])
 
             if not (0 < cur_level <= prev_level + 1):
                 raise Exception('plus (+) count is invalid here: %s' % line.strip())
