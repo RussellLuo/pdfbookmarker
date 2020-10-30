@@ -21,7 +21,7 @@ $ pip install pdfbookmarker
     <nested level>"<bookmark title>"|<page number>
     ```
 
-For samples, see `sample_bookmarks.txt`.
+For samples, see [`sample_bookmarks.txt`](./sample_bookmarks.txt).
 
 2)  Generate a copy of `MyBook.pdf` with additional bookmarks file specified by
     `my_bookmarks.txt`:
