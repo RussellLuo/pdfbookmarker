@@ -30,7 +30,7 @@ setup(
     py_modules=['pdfbookmarker'],
     url='https://github.com/RussellLuo/pdfbookmarker',
     install_requires=[
-        'PyPDF2==1.26.0',
+        'PyPDF2==1.27.5',
     ],
     entry_points={
         'console_scripts': [
