@@ -21,7 +21,7 @@ import os
 import re
 import sys
 
-from PyPDF2 import PdfFileMerger, PdfFileReader
+from PyPDF2 import PdfMerger, PdfReader
 
 __version__ = '0.6.0'
 __author__ = 'RussellLuo'
@@ -40,20 +40,20 @@ def add_bookmarks(pdf_in_filename, bookmarks_tree, pdf_out_filename=None):
         [2] http://stackoverflow.com/questions/18855907/adding-bookmarks-using-pypdf2
         [3] http://stackoverflow.com/questions/3009935/looking-for-a-good-python-tree-data-structure
     """
-    pdf_in = PdfFileReader(pdf_in_filename)
+    pdf_in = PdfReader(pdf_in_filename)
 
-    # merge `pdf_in` into `pdf_out`, using PyPDF2.PdfFileMerger()
-    pdf_out = PdfFileMerger()
-    pdf_out.append(pdf_in, import_bookmarks=False)
+    # merge `pdf_in` into `pdf_out`, using PyPDF2.PdfMerger()
+    pdf_out = PdfMerger()
+    pdf_out.append(pdf_in, import_outline=False)
 
     # copy/preserve existing document info
-    doc_info = pdf_in.getDocumentInfo()
+    doc_info = pdf_in.metadata
     if doc_info:
         pdf_out.addMetadata(doc_info)
 
     def crawl_tree(tree, parent):
         for title, page_num, subtree in tree:
-            current = pdf_out.addBookmark(title, page_num, parent) # add parent bookmark
+            current = pdf_out.add_outline_item(title, page_num, parent) # add parent bookmark
             if subtree:
                 crawl_tree(subtree, current)
 
